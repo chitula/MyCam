@@ -119,7 +119,7 @@ def startRecording(myo):
 		scaleFactor=1.1,
 		minNeighbors=5,
 		minSize=(125, 125),
-		flags=cv2.cv.CV_HAAR_SCALE_IMAGE
+		flags=cv2.cv.CV_HAAR_SCALE_IMAGE		# CV_HAAR_SCALE_IMAGE
 	)
 
 	# Draw a rectangle around the faces
@@ -154,18 +154,20 @@ def startRecording(myo):
 		# detect leaving frame along x direction
 		if( abs(x_ctr - x_face) > x_offset ):
 			cv2.rectangle(frame, (x_ctr-x_offset, y_ctr-y_offset), (x_ctr+x_offset, y_ctr+y_offset), (0, 0, 255), 2)
+			servoRotateDeg = ((x_face - x_ctr))/pixelToServoScale;
+			# print servoRotateDeg
 
-		servoRotateDeg = ((x_face - x_ctr))/pixelToServoScale;
-		# print servoRotateDeg
-
-		if(servoRotateDeg > 0):
-			# servoRotateString = '+' + str(servoRotateDeg);
-			servoRotateString = '+1'
-			#ser.write(servoRotateString)
-		else:
-			# servoRotateString = '-' + str(servoRotateDeg);
-			servoRotateString = '-1'
-			#ser.write(servoRotateString)
+			if(servoRotateDeg > 0):
+				# servoRotateString = '+' + str(servoRotateDeg);
+				servoRotateString = '+1'
+				ser.write(servoRotateString)
+			elif(servoRotateDeg < 0):
+				# servoRotateString = '-' + str(servoRotateDeg);
+				servoRotateString = '-1'
+				ser.write(servoRotateString)
+			else:
+				servoRotateString = '+0'
+				ser.write(servoRotateString)
 
 
 	# Display the resulting frame
@@ -183,7 +185,7 @@ faceCascade = cv2.CascadeClassifier(cascPath)
 video_capture = cv2.VideoCapture(0)     # may want to change paramater number to get proper webcam
 out = cv2.VideoWriter('output.avi',-1, 20, (640,480))
 
-# ser = serial.Serial(11, 9600)
+ser = serial.Serial(11, 9600)
 x_queue = deque()
 y_queue = deque()
 
@@ -192,7 +194,7 @@ pixelToServoScale = 20
 x_ctr = 320
 y_ctr = 240
 
-x_offset = 150
-y_offset = 150
+x_offset = 100
+y_offset = 100
 
 main()
