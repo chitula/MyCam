@@ -43,7 +43,7 @@ def detectPinkyData(myo, callback):
 	last_pose = myo.getPose()
 
 def detectPinky(action_callback):
-  myMyo = Myo(callback=detectPinkyData(action_callback))
+  myMyo = Myo(callback=detectPinkyData(self, action_callback))
   myMyo.daemon = True
   myMyo.start()
 

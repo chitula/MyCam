@@ -2,7 +2,63 @@ import cv2
 import sys
 import serial
 import noah_test
+from myo import Myo
 from collections import deque
+
+last_pose = None
+
+def printData(myo):
+  global last_pose
+  
+  # Rotation is represented by number of stars (as in hello-myo.exe)
+  # (roll_str, pitch_str, yaw_str) = ["*" * int(r) for r in myo.getRotationScaled(18.0)]
+  
+  # arm_str = myo.getArmString()
+  
+  pose_str = myo.getPoseString()
+  
+  # Print out the rotation and arm state on the same line each update
+  sys.stdout.write('\r[{:15s}]'.format(
+      # roll_str,
+      # pitch_str,
+      # yaw_str,
+      # arm_str, 
+      pose_str,
+    )
+  )
+  
+  if (pose_str == "fist") and (last_pose != myo.getPose()):
+    myo.vibrate(Myo.VIBE_MEDIUM)
+  
+  last_pose = myo.getPose()
+
+def detectPinkyData(myo):
+	global last_pose
+  
+	# Rotation is represented by number of stars (as in hello-myo.exe)
+	# (roll_str, pitch_str, yaw_str) = ["*" * int(r) for r in myo.getRotationScaled(18.0)]
+
+	# arm_str = myo.getArmString()
+
+	pose_str = myo.getPoseString()
+
+	if((pose_str == "thumbToPinky") and (last_pose) != myo.getPose()):
+		myo.vibrate(Myo.VIBE_MEDIUM)
+		startRecording()
+
+	last_pose = myo.getPose()
+
+def detectPinky():
+  myMyo = Myo(callback=detectPinkyData)
+  myMyo.daemon = True
+  myMyo.start()
+  raw_input(" ")
+
+def main():
+  myMyo = Myo(callback=printData)
+  myMyo.daemon = True
+  myMyo.start()
+  raw_input(" ")
 
 def startRecording():
   while True:
@@ -81,6 +137,7 @@ cascPath = sys.argv[1]
 faceCascade = cv2.CascadeClassifier(cascPath)
 
 video_capture = cv2.VideoCapture(0)     # may want to change paramater number to get proper webcam
+retVal = cv2.VideoWriter.open("test, fourcc, fps, frameSize)
 
 # ser = serial.Serial(11, 9600)
 x_queue = deque()
@@ -94,4 +151,4 @@ y_ctr = 240
 x_offset = 150
 y_offset = 150
 
-noah_test.detectPinky(startRecording)
+detectPinky()
