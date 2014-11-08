@@ -32,7 +32,7 @@ def printData(myo):
   
   last_pose = myo.getPose()
 
-def detectPinkyData(myo):
+def detectPinky(myo):
 	global last_pose
   
 	# Rotation is represented by number of stars (as in hello-myo.exe)
@@ -48,24 +48,42 @@ def detectPinkyData(myo):
 
 	last_pose = myo.getPose()
 
-def detectPinky():
-  myMyo = Myo(callback=detectPinkyData)
-  myMyo.daemon = True
-  myMyo.start()
-  raw_input(" ")
+def detectFist(myo):
+	global last_pose
+  
+	# Rotation is represented by number of stars (as in hello-myo.exe)
+	# (roll_str, pitch_str, yaw_str) = ["*" * int(r) for r in myo.getRotationScaled(18.0)]
+
+	# arm_str = myo.getArmString()
+
+	pose_str = myo.getPoseString()
+
+	if((pose_str == "fist") and (last_pose) != myo.getPose()):
+		myo.vibrate(Myo.VIBE_MEDIUM)
+		stopRecording()
+
+	last_pose = myo.getPose()
 
 def main():
-  myMyo = Myo(callback=printData)
+  myMyo = Myo(callback=detectPinky)
   myMyo.daemon = True
   myMyo.start()
   raw_input(" ")
 
 def startRecording():
+  myMyo = Myo(callback=printData)
+  myMyo.daemon = True
+  myMyo.start()
+  raw_input(" ")
   while True:
       # print ser.readline()
 
       # Capture frame-by-frame
       ret, frame = video_capture.read()   # frame is single frame, ignore ret
+
+      # Write frame to video file
+      frame_out = cv2.flip(frame,0)
+      out.write(frame_out)
 
       gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
@@ -129,15 +147,20 @@ def startRecording():
       if cv2.waitKey(1) & 0xFF == ord('q'):   # if q is pressed
           break
 
+def stopRecording():
   # When everything is done, release the capture
   video_capture.release()
+  out.release()
   cv2.destroyAllWindows()
+
+def CV_FOURCC(c1, c2, c3, c4):
+    return (int(c1.encode("hex")) & 255) + ((int(c2.encode("hex")) & 255) << 8) + ((int(c3.encode("hex")) & 255) << 16) + ((int(c4.encode("hex")) & 255) << 24)
 
 cascPath = sys.argv[1]
 faceCascade = cv2.CascadeClassifier(cascPath)
 
 video_capture = cv2.VideoCapture(0)     # may want to change paramater number to get proper webcam
-retVal = cv2.VideoWriter.open("test, fourcc, fps, frameSize)
+out = cv2.VideoWriter('output.avi',CV_FOURCC('D','I','V','X'), 20.0, (640,480))
 
 # ser = serial.Serial(11, 9600)
 x_queue = deque()
@@ -151,4 +174,4 @@ y_ctr = 240
 x_offset = 150
 y_offset = 150
 
-detectPinky()
+main()
