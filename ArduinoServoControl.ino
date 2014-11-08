@@ -26,7 +26,7 @@ void setup() {
 
 long pmilUpdate = 0;
 long cmilUpdate = 0;
-long dlymilUpdate = 50;
+long dlymilUpdate = 500;
 
 void loop() {
 	int x_error;
@@ -34,7 +34,30 @@ void loop() {
 
 	if (Serial.available()) {
 		for (int i = 0; i < numServos; i++) {
-			error[i] = constrain(Serial.read(), -10, 10);
+//			error[i] = constrain(Serial.read() - '0', -10, 10);
+			
+			char errorSign = Serial.read();
+			while(!Serial.available()) {
+				//Stall
+			};
+			
+			char errorVal = Serial.read();
+			
+			if (errorSign == '+') {
+				error[i] = errorVal - '0';
+			} else {
+				error[i] = -(errorVal - '0');
+			}
+
+			Serial.print("errorSign[X] = ");
+			Serial.println(errorSign);
+			Serial.print("errorVal[X] = ");
+			Serial.println(errorVal);
+
+			Serial.print("error[");
+			Serial.print(i == X ? "X" : "Y");
+			Serial.print("] = ");
+			Serial.println(error[i]);
 		}
 
 	}
@@ -46,6 +69,12 @@ void loop() {
 			current_pos[i] += error[i];
 			current_pos[i] = constrain(current_pos[i], 20, 160);
 			servo[i].write(current_pos[i]);
+
+			// Print the servo ID and it's position
+			Serial.print("Servo[");
+			Serial.print(i);
+			Serial.print("] pos = ");
+			Serial.println(current_pos[i]);
 		}
 		pmilUpdate = cmilUpdate;
 	}
