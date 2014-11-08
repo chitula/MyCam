@@ -54,15 +54,15 @@ void loop() {
 				error[i] = -(errorVal - '0');
 			}
 
-			Serial.print("errorSign[X] = ");
-			Serial.println(errorSign);
-			Serial.print("errorVal[X] = ");
-			Serial.println(errorVal);
+			// Serial.print("errorSign[X] = ");
+			// Serial.println(errorSign);
+			// Serial.print("errorVal[X] = ");
+			// Serial.println(errorVal);
 
-			Serial.print("error[");
-			Serial.print(i == X ? "X" : "Y");
-			Serial.print("] = ");
-			Serial.println(error[i]);
+			// Serial.print("error[");
+			// Serial.print(i == X ? "X" : "Y");
+			// Serial.print("] = ");
+			// Serial.println(error[i]);
 		}
 
 	}
@@ -72,6 +72,7 @@ void loop() {
 	if (dlymilUpdate < cmilUpdate - pmilUpdate) {
 		for (int i = 0; i < numServos; i++) {
 			current_pos[i] += error[i];
+			error[i] = 0;	//Clear the error, so error is not carried forward
 			current_pos[i] = constrain(current_pos[i], 20, 160);
 			servo[i].write(current_pos[i]);
 
