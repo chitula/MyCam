@@ -181,7 +181,7 @@ cascPath = sys.argv[1]
 faceCascade = cv2.CascadeClassifier(cascPath)
 
 video_capture = cv2.VideoCapture(0)     # may want to change paramater number to get proper webcam
-out = cv2.VideoWriter('output.avi',-1, 25, (640,480))
+out = cv2.VideoWriter('output.avi',-1, 20, (640,480))
 
 # ser = serial.Serial(11, 9600)
 x_queue = deque()
