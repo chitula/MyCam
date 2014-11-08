@@ -6,6 +6,7 @@ from myo import Myo
 from collections import deque
 
 last_pose = None
+imgCount = 0
 
 def printData(myo):
 	global last_pose
@@ -62,8 +63,12 @@ def main2():
 
 def startRecording(myo):
 
-	# Myo stuff!
+	# Capture frame-by-frame
+	ret, frame = video_capture.read()   # frame is single frame, ignore ret
+
+	# ---------- Myo stuff! ---------- #
 	global last_pose
+	global imgCount
 
 	# Rotation is represented by number of stars (as in hello-myo.exe)
 	# (roll_str, pitch_str, yaw_str) = ["*" * int(r) for r in myo.getRotationScaled(18.0)]
@@ -80,6 +85,11 @@ def startRecording(myo):
 	)
 	)
 
+	if((pose_str == "waveOut") and (last_pose) != myo.getPose()):
+		myo.vibrate(Myo.VIBE_SHORT)
+		cv2.imwrite("img_" + str(imgCount) + ".jpg", frame)
+		imgCount = imgCount + 1;
+
 	if((pose_str == "fist") and (last_pose) != myo.getPose()):
 		myo.vibrate(Myo.VIBE_MEDIUM)
 		stopRecording()
@@ -88,11 +98,11 @@ def startRecording(myo):
 
 	# --------- End Myo stuff ---------- #
 
+
+
+
 	# print ser.readline()
 
-
-	# Capture frame-by-frame
-	ret, frame = video_capture.read()   # frame is single frame, ignore ret
 	# Write frame to video file
 	frame_out = cv2.flip(frame,0)
 	out.write(frame_out)
