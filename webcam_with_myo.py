@@ -61,6 +61,12 @@ def main2():
 	myMyo.start()
 	raw_input(" ")
 
+def stopRecording():
+	# When everything is done, release the capture
+	video_capture.release()
+	out.release()
+	cv2.destroyAllWindows()
+
 def startRecording(myo):
 
 	# Capture frame-by-frame
@@ -104,8 +110,7 @@ def startRecording(myo):
 	# print ser.readline()
 
 	# Write frame to video file
-	frame_out = cv2.flip(frame,0)
-	out.write(frame_out)
+	out.write(frame)
 
 	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
@@ -166,14 +171,8 @@ def startRecording(myo):
 	# Display the resulting frame
 	cv2.imshow('Video', frame)
 
-	if cv2.waitKey(1) & 0xFF == ord('q'):   # if q is pressed
-		return
-
-def stopRecording():
-	# When everything is done, release the capture
-	video_capture.release()
-	out.release()
-	cv2.destroyAllWindows()
+	if (cv2.waitKey(5) != -1):
+		stopRecording()
 
 def CV_FOURCC(c1, c2, c3, c4):
 	return (int(c1.encode("hex")) & 255) + ((int(c2.encode("hex")) & 255) << 8) + ((int(c3.encode("hex")) & 255) << 16) + ((int(c4.encode("hex")) & 255) << 24)
@@ -182,7 +181,7 @@ cascPath = sys.argv[1]
 faceCascade = cv2.CascadeClassifier(cascPath)
 
 video_capture = cv2.VideoCapture(0)     # may want to change paramater number to get proper webcam
-out = cv2.VideoWriter('output.avi',CV_FOURCC('D','I','V','X'), 20.0, (640,480))
+out = cv2.VideoWriter('output.avi',-1, 25, (640,480))
 
 # ser = serial.Serial(11, 9600)
 x_queue = deque()
