@@ -37,12 +37,17 @@ void loop() {
 //			error[i] = constrain(Serial.read() - '0', -10, 10);
 			
 			char errorSign = Serial.read();
-			while(!Serial.available()) {
-				//Stall
-			};
-			
+			// while(!Serial.available()) {
+			// 	//Stall
+			// };
+			delay(50);
+
 			char errorVal = Serial.read();
-			
+			// Ignore invalid errorVal values (outside range 0-9)
+			if (errorVal < '0' || errorVal > '9') {
+				errorVal = '0';
+			}
+
 			if (errorSign == '+') {
 				error[i] = errorVal - '0';
 			} else {
