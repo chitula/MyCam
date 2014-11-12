@@ -26,55 +26,46 @@ void setup() {
 
 long pmilUpdate = 0;
 long cmilUpdate = 0;
-long dlymilUpdate = 500;
+long dlymilUpdate = 50;
 
 void loop() {
-	int x_error;
-	int y_error;
-
+	// Check the serial buffer for servo position error values:
+	// 1st byte = x-servo sign [char: +/-], 2nd byte = x-servo error value [char: 0-9]
+	// 3rd & 4th byte for y-servo sign & error when y-servo is enabled (i.e. numServos = 2)
 	if (Serial.available()) {
+		char errorSign[2];
+		char errorVal[2];
+
 		for (int i = 0; i < numServos; i++) {
-//			error[i] = constrain(Serial.read() - '0', -10, 10);
-			
-			char errorSign = Serial.read();
-			// while(!Serial.available()) {
-			// 	//Stall
-			// };
+			errorSign[i] = Serial.read();
 			delay(50);
+			errorVal[i] = Serial.read();
 
-			char errorVal = Serial.read();
-			// Ignore invalid errorVal values (outside range 0-9)
-			if (errorVal < '0' || errorVal > '9') {
-				errorVal = '0';
-			}
-
-			if (errorSign == '+') {
-				error[i] = errorVal - '0';
+			// Store servo position error if sign is valid, otherwise ignore it
+			if (errorSign[i] == '+') {
+				error[i] = errorVal[i] - '0';
+			} else if (errorSign[i] == '-') {
+				error[i] = -(errorVal[i] - '0');
 			} else {
-				error[i] = -(errorVal - '0');
+				error[i] = 0;
 			}
 
-			// Serial.print("errorSign[X] = ");
-			// Serial.println(errorSign);
-			// Serial.print("errorVal[X] = ");
-			// Serial.println(errorVal);
-
-			// Serial.print("error[");
-			// Serial.print(i == X ? "X" : "Y");
-			// Serial.print("] = ");
-			// Serial.println(error[i]);
+			// Ignore invalid errorVal values (outside range 0-9)
+			if (errorVal[i] < '0' || errorVal[i] > '9') {
+				errorVal[i] = '0';
+			}
 		}
 
 	}
 
-	// Update the servo's position
+	// Update the servo's position, based on the error
 	cmilUpdate = millis();
 	if (dlymilUpdate < cmilUpdate - pmilUpdate) {
 		for (int i = 0; i < numServos; i++) {
 			current_pos[i] += error[i];
 			error[i] = 0;	//Clear the error, so error is not carried forward
 			current_pos[i] = constrain(current_pos[i], 20, 160);
-			servo[i].write(current_pos[i]);
+			servo[i].write(180 - current_pos[i]);
 
 			// Print the servo ID and it's position
 			Serial.print("Servo[");
