@@ -152,22 +152,35 @@ def startRecording(myo):
 		# print x_avg, ", ", y_avg
 
 		# detect leaving frame along x direction
-		if( abs(x_ctr - x_face) > x_offset ):
-			cv2.rectangle(frame, (x_ctr-x_offset, y_ctr-y_offset), (x_ctr+x_offset, y_ctr+y_offset), (0, 0, 255), 2)
-			servoRotateDeg = ((x_face - x_ctr))/pixelToServoScale;
+		if( (abs(x_ctr - x_face) > x_offset) or (abs(y_ctr - y_face) > y_offset)):
+			cv2.rectangle(frame, (x_ctr-x_offset, y_ctr-y_offset), (x_ctr+x_offset, y_ctr+y_offset), (0, 0, 255), 2)	# display bounding box
+			
+			if(abs(x_ctr - x_face) > x_offset):									# if x_face is outside of bounding box, find servoRotateDegX
+				servoRotateDegX = ((x_face - x_ctr))/pixelToServoScale;
+			else:
+				servoRotateDegX = 0;
+
+			if(abs(y_ctr - y_face) > y_offset):									# if y_face is outside of bounding box, find servoRotateDegY
+				servoRotateDegY = ((y_face - y_ctr))/pixelToServoScale;
+			else:
+				servoRotateDegY = 0;
 			# print servoRotateDeg
 
-			if(servoRotateDeg > 0):
-				# servoRotateString = '+' + str(servoRotateDeg);
-				servoRotateString = '+1'
-				ser.write(servoRotateString)
-			elif(servoRotateDeg < 0):
-				# servoRotateString = '-' + str(servoRotateDeg);
-				servoRotateString = '-1'
-				ser.write(servoRotateString)
+			if(servoRotateDegX > 0):											# determine string to send to X servo
+				servoRotateStringX = '+1';
+			elif(servoRotateDegX < 0):
+				servoRotateStringX = '-1';
 			else:
-				servoRotateString = '+0'
-				ser.write(servoRotateString)
+				servoRotateStringX = '0';
+
+			if(servoRotateDegY > 0):											# determine string to send to Y servo
+				servoRotateStringY = '+1';
+			elif(servoRotateDegY < 0):
+				servoRotateStringY = '-1';
+			else:
+				servoRotateStringY = '0';
+
+			ser.write(servoRotateStringX + servoRotateStringY)
 
 
 	# Display the resulting frame
@@ -189,6 +202,8 @@ ser = serial.Serial(11, 9600)
 x_queue = deque()
 y_queue = deque()
 
+# --------- configuration ---------
+
 pixelToServoScale = 20
 
 x_ctr = 320
@@ -196,5 +211,7 @@ y_ctr = 240
 
 x_offset = 100
 y_offset = 100
+
+# --------- configuration ---------
 
 main()
